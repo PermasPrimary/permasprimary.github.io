@@ -1,61 +1,367 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh">
 <head>
     <meta charset="UTF-8">
-    <title>Permas Primary</title>
+    <title>马来语学习游戏</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
             margin: 0;
-            padding: 20px;
-            background-color: #f0f2f5;
+            padding: 0;
+            background-color: #1a1a1a;
+            font-family: Arial, sans-serif;
+            color: white;
+        }
+        .game-container {
+            position: relative;
+            height: 100vh;
+            width: 100%;
+            overflow: hidden;
+        }
+        .status-bar {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            padding: 1rem;
             display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
+            justify-content: space-between;
+            background-color: #333;
+            z-index: 100;
         }
-        .container {
-            background: white;
-            padding: 40px;
-            border-radius: 15px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        .status-left {
+            display: flex;
+            gap: 2rem;
+        }
+        .question {
+            position: absolute;
+            top: 80px;
+            left: 0;
+            right: 0;
             text-align: center;
-            max-width: 600px;
-            width: 90%;
+            font-size: 1.5rem;
+            font-weight: bold;
+            background-color: rgba(51, 51, 51, 0.8);
+            padding: 1rem;
+            z-index: 90;
         }
-        h1 {
-            color: #1a73e8;
-            margin-bottom: 20px;
-            font-size: 2.5em;
+        .zombie {
+            position: absolute;
+            cursor: pointer;
+            transition: transform 0.2s;
+            text-align: center;
         }
-        p {
-            color: #555;
-            font-size: 1.2em;
-            margin-bottom: 30px;
+        .zombie:hover {
+            transform: scale(1.1);
         }
-        .game-button {
-            display: inline-block;
-            padding: 15px 30px;
+        .zombie-word {
+            background-color: #2b7a2b;
+            padding: 0.5rem;
+            border-radius: 0.5rem;
+            font-weight: bold;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        .zombie-emoji {
+            font-size: 2.5rem;
+            margin-top: 0.5rem;
+        }
+        .game-over {
+            position: fixed;
+            inset: 0;
+            background-color: rgba(0, 0, 0, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        .game-over-content {
+            background-color: white;
+            color: black;
+            padding: 2rem;
+            border-radius: 1rem;
+            text-align: center;
+        }
+        .game-over-content button {
+            background-color: #2b7a2b;
+            color: white;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 0.5rem;
+            font-size: 1.1rem;
+            cursor: pointer;
+            margin-top: 1rem;
+        }
+        .game-over-content button:hover {
+            background-color: #1f5f1f;
+        }
+        .instructions {
+            position: fixed;
+            bottom: 1rem;
+            left: 1rem;
+            font-size: 0.9rem;
+            z-index: 80;
+        }
+        .back-button {
+            position: fixed;
+            bottom: 1rem;
+            right: 1rem;
             background-color: #1a73e8;
             color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
             text-decoration: none;
-            border-radius: 8px;
-            font-size: 1.2em;
-            font-weight: bold;
-            transition: all 0.3s ease;
+            z-index: 80;
         }
-        .game-button:hover {
+        .back-button:hover {
             background-color: #1557b0;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(26,115,232,0.3);
         }
     </style>
+    <script src="https://unpkg.com/react@17/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@17/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
 </head>
 <body>
-    <div class="container">
-        <h1>Permas Primary</h1>
-        <p>欢迎来到 Permas Primary 马来语学习平台！</p>
-        <a href="game" class="game-button">开始马来语学习游戏</a>
-    </div>
+    <div id="root"></div>
+    <script type="text/babel">
+        const ZombieGame = () => {
+            const [score, setScore] = React.useState(0);
+            const [lives, setLives] = React.useState(3);
+            const [gameOver, setGameOver] = React.useState(false);
+            const [zombies, setZombies] = React.useState([]);
+            const [currentQuestion, setCurrentQuestion] = React.useState(null);
+            const [answerGenerated, setAnswerGenerated] = React.useState(false);
+            const [questionCount, setQuestionCount] = React.useState(0);
+            const [level, setLevel] = React.useState(1);
+
+            const QUESTIONS_PER_LEVEL = 10;
+            const POSITION_ZONES = [
+                { min: 5, max: 20 },
+                { min: 25, max: 35 },
+                { min: 40, max: 50 },
+                { min: 55, max: 65 },
+                { min: 70, max: 80 },
+                { min: 85, max: 95 }
+            ];
+
+            const wordBank = [
+                ['memerlukan', '需要'],
+                ['lauk-pauk', '菜肴'],
+                ['kegemaran', '喜欢的'],
+                ['bergerak', '移动'],
+                ['pengetahuan', '知识'],
+                ['penyabar', '有耐心的'],
+                ['merawat', '治疗'],
+                ['panggil', '叫'],
+                ['lemau', '皮了'],
+                ['gopoh', '匆忙']
+            ];
+
+            const getRandomPosition = (usedPositions) => {
+                const availableZones = POSITION_ZONES.filter((_, index) => 
+                    !usedPositions.includes(index)
+                );
+                if (availableZones.length === 0) return null;
+                
+                const randomZone = availableZones[Math.floor(Math.random() * availableZones.length)];
+                const position = Math.random() * (randomZone.max - randomZone.min) + randomZone.min;
+                return {
+                    position,
+                    zoneIndex: POSITION_ZONES.indexOf(randomZone)
+                };
+            };
+
+            const generateQuestion = () => {
+                const randomPair = wordBank[Math.floor(Math.random() * wordBank.length)];
+                setAnswerGenerated(false);
+                return {
+                    malay: randomPair[0],
+                    chinese: randomPair[1]
+                };
+            };
+
+            const generateZombie = (forceAnswer = false) => {
+                const usedPositions = zombies.map(z => z.zoneIndex);
+                const positionData = getRandomPosition(usedPositions);
+                
+                if (!positionData) return null;
+
+                if (forceAnswer || (!answerGenerated && currentQuestion)) {
+                    setAnswerGenerated(true);
+                    return {
+                        id: Date.now(),
+                        word: currentQuestion.malay,
+                        isAnswer: true,
+                        position: positionData.position,
+                        zoneIndex: positionData.zoneIndex,
+                        top: -50
+                    };
+                } else {
+                    let randomPair;
+                    do {
+                        randomPair = wordBank[Math.floor(Math.random() * wordBank.length)];
+                    } while (currentQuestion && randomPair[0] === currentQuestion.malay);
+                    
+                    return {
+                        id: Date.now(),
+                        word: randomPair[0],
+                        isAnswer: false,
+                        position: positionData.position,
+                        zoneIndex: positionData.zoneIndex,
+                        top: -50
+                    };
+                }
+            };
+
+            const startNewLevel = () => {
+                setZombies([]);
+                setAnswerGenerated(false);
+                setCurrentQuestion(generateQuestion());
+            };
+
+            const startNewGame = () => {
+                setScore(0);
+                setLives(3);
+                setGameOver(false);
+                setQuestionCount(0);
+                setLevel(1);
+                startNewLevel();
+            };
+
+            React.useEffect(() => {
+                startNewGame();
+            }, []);
+
+            React.useEffect(() => {
+                if (gameOver) return;
+                
+                if (!answerGenerated && currentQuestion) {
+                    const zombie = generateZombie(true);
+                    if (zombie) {
+                        setZombies(prev => [...prev, zombie]);
+                    }
+                }
+                
+                const interval = setInterval(() => {
+                    const zombie = generateZombie();
+                    if (zombie) {
+                        setZombies(prev => [...prev, zombie]);
+                    }
+                }, 2000);
+
+                return () => clearInterval(interval);
+            }, [gameOver, currentQuestion, answerGenerated]);
+
+            React.useEffect(() => {
+                if (gameOver) return;
+
+                const moveInterval = setInterval(() => {
+                    setZombies(prev => {
+                        const newZombies = prev.map(zombie => ({
+                            ...zombie,
+                            top: zombie.top + 1.5
+                        })).filter(zombie => zombie.top < window.innerHeight - 100);
+
+                        if (prev.length > newZombies.length) {
+                            setLives(lives => {
+                                const newLives = lives - 1;
+                                if (newLives <= 0) {
+                                    setGameOver(true);
+                                }
+                                return newLives;
+                            });
+                        }
+
+                        return newZombies;
+                    });
+                }, 50);
+
+                return () => clearInterval(moveInterval);
+            }, [gameOver]);
+
+            const handleClick = (zombie) => {
+                if (gameOver) return;
+
+                if (zombie.isAnswer) {
+                    setScore(score + 1);
+                    setQuestionCount(prev => {
+                        const newCount = prev + 1;
+                        if (newCount >= QUESTIONS_PER_LEVEL) {
+                            setLevel(level + 1);
+                            setQuestionCount(0);
+                            startNewLevel();
+                        } else {
+                            setCurrentQuestion(generateQuestion());
+                        }
+                        return newCount;
+                    });
+                } else {
+                    setLives(lives => {
+                        const newLives = lives - 1;
+                        if (newLives <= 0) {
+                            setGameOver(true);
+                        }
+                        return newLives;
+                    });
+                }
+                
+                setZombies(prev => prev.filter(z => z.id !== zombie.id));
+            };
+
+            return (
+                <div className="game-container">
+                    <div className="status-bar">
+                        <div className="status-left">
+                            <div>第 {level} 关</div>
+                            <div>题目: {questionCount}/{QUESTIONS_PER_LEVEL}</div>
+                            <div>分数: {score}</div>
+                        </div>
+                        <div className="lives">生命值: {'❤️'.repeat(lives)}</div>
+                    </div>
+
+                    <div className="question">
+                        请选择"{currentQuestion?.chinese}"的马来文
+                    </div>
+
+                    {zombies.map(zombie => (
+                        <div
+                            key={zombie.id}
+                            className="zombie"
+                            style={{
+                                left: `${zombie.position}%`,
+                                top: zombie.top,
+                            }}
+                            onClick={() => handleClick(zombie)}
+                        >
+                            <div className="zombie-word">{zombie.word}</div>
+                            <div className="zombie-emoji">🧟</div>
+                        </div>
+                    ))}
+
+                    {gameOver && (
+                        <div className="game-over">
+                            <div className="game-over-content">
+                                <h2>游戏结束!</h2>
+                                <p>最终得分: {score}</p>
+                                <p>达到第 {level} 关</p>
+                                <button onClick={startNewGame}>
+                                    重新开始
+                                </button>
+                            </div>
+                        </div>
+                    )}
+
+                    <div className="instructions">
+                        <p>点击对应题目的马来文僵尸得分</p>
+                        <p>每关需答对10题才能进入下一关</p>
+                        <p>点错或让僵尸触底都会扣生命值</p>
+                        <p>三次失误后游戏结束</p>
+                    </div>
+
+                    <a href="../" className="back-button">返回主页</a>
+                </div>
+            );
+        };
+
+        ReactDOM.render(<ZombieGame />, document.getElementById('root'));
+    </script>
 </body>
 </html>
