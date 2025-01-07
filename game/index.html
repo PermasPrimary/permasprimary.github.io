@@ -1,82 +1,51 @@
 <!DOCTYPE html>
-<html lang="zh">
+<html>
 <head>
     <meta charset="UTF-8">
-    <title>马来语学习游戏</title>
+    <title>Permas Primary</title>
     <style>
         body {
-            margin: 0;
-            padding: 0;
-            background-color: #1a1a1a;
             font-family: Arial, sans-serif;
-            height: 100vh;
+            margin: 0;
+            padding: 20px;
+            background-color: #f0f2f5;
             display: flex;
-            flex-direction: column;
-            color: white;
-        }
-        .game-container {
-            width: 100%;
-            flex: 1;
-            position: relative;
-            overflow: hidden;
-        }
-        .status-bar {
-            padding: 1rem;
-            background-color: #333;
-            display: flex;
-            justify-content: space-between;
+            justify-content: center;
             align-items: center;
+            min-height: 100vh;
         }
-        .question {
-            background-color: rgba(51, 51, 51, 0.9);
-            padding: 1rem;
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
             text-align: center;
-            font-size: 1.5rem;
-            margin: 1rem 0;
         }
-        .word {
-            position: absolute;
-            padding: 0.5rem 1rem;
-            background-color: #2b7a2b;
+        h1 {
+            color: #1a73e8;
+            margin-bottom: 20px;
+        }
+        .game-button {
+            display: inline-block;
+            padding: 15px 30px;
+            background-color: #1a73e8;
+            color: white;
+            text-decoration: none;
             border-radius: 5px;
-            cursor: pointer;
-            transition: transform 0.2s;
-            user-select: none;
+            font-size: 18px;
+            margin-top: 20px;
+            transition: background-color 0.3s;
         }
-        .word:hover {
-            transform: scale(1.1);
-        }
-        .zombie {
-            font-size: 2rem;
-            text-align: center;
-            margin-top: 0.5rem;
+        .game-button:hover {
+            background-color: #1557b0;
         }
     </style>
 </head>
 <body>
-    <div class="status-bar">
-        <div>生命值: ❤️❤️❤️</div>
-        <div>分数: 0</div>
+    <div class="container">
+        <h1>Permas Primary</h1>
+        <p>Welcome to Permas Primary School's learning platform.</p>
+        <a href="game" class="game-button">Play Malay Learning Game</a>
     </div>
-
-    <div class="question">
-        请点击"需要"的马来文
-    </div>
-
-    <div class="game-container">
-        <div class="word" style="left: 20%; top: 20%">
-            memerlukan
-            <div class="zombie">🧟</div>
-        </div>
-        <div class="word" style="left: 60%; top: 40%">
-            lauk-pauk
-            <div class="zombie">🧟</div>
-        </div>
-    </div>
-
-    <script>
-        // 我们先创建一个简单的静态版本
-        // 确认基本显示正常后再添加完整的游戏逻辑
-    </script>
 </body>
 </html>
