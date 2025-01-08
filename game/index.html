@@ -24,6 +24,8 @@
             display: flex;
             justify-content: space-between;
             box-sizing: border-box;
+            position: relative;
+            z-index: 100;
         }
         .question {
             background-color: rgba(51, 51, 51, 0.9);
@@ -33,12 +35,14 @@
             position: absolute;
             width: 100%;
             top: 60px;
+            z-index: 90;
         }
         .zombie {
             position: absolute;
             cursor: pointer;
             transition: transform 0.2s;
             text-align: center;
+            z-index: 1;
         }
         .zombie:hover {
             transform: scale(1.1);
@@ -61,29 +65,132 @@
             padding: 10px 20px;
             border-radius: 5px;
             text-decoration: none;
+            z-index: 100;
         }
     </style>
+    <script>
+        let score = 0;
+        let lives = 3;
+        const wordPairs = [
+            ['memerlukan', '需要'],
+            ['lauk-pauk', '菜肴'],
+            ['kegemaran', '喜欢的'],
+            ['bergerak', '移动']
+        ];
+        let currentQuestion = null;
+        let zombies = [];
+
+        function updateScore() {
+            document.getElementById('score').textContent = `分数: ${score}`;
+        }
+
+        function updateLives() {
+            document.getElementById('lives').textContent = `生命值: ${'❤️'.repeat(lives)}`;
+        }
+
+        function createZombie(word, isAnswer) {
+            const zombie = document.createElement('div');
+            zombie.className = 'zombie';
+            zombie.style.left = Math.random() * 80 + 10 + '%';
+            zombie.style.top = '-50px';
+            
+            const wordDiv = document.createElement('div');
+            wordDiv.className = 'zombie-word';
+            wordDiv.textContent = word;
+            
+            const emojiDiv = document.createElement('div');
+            emojiDiv.className = 'zombie-emoji';
+            emojiDiv.textContent = '🧟';
+            
+            zombie.appendChild(wordDiv);
+            zombie.appendChild(emojiDiv);
+            
+            zombie.onclick = () => {
+                if (isAnswer) {
+                    score++;
+                    updateScore();
+                    generateQuestion();
+                } else {
+                    lives--;
+                    updateLives();
+                    if (lives <= 0) {
+                        alert('游戏结束！\n最终得分: ' + score);
+                        resetGame();
+                    }
+                }
+                zombie.remove();
+            };
+            
+            document.querySelector('.game-container').appendChild(zombie);
+            return zombie;
+        }
+
+        function generateQuestion() {
+            const pair = wordPairs[Math.floor(Math.random() * wordPairs.length)];
+            currentQuestion = pair;
+            document.querySelector('.question').textContent = `请选择"${pair[1]}"的马来文`;
+            createZombie(pair[0], true);
+        }
+
+        function moveZombies() {
+            document.querySelectorAll('.zombie').forEach(zombie => {
+                const top = parseFloat(zombie.style.top);
+                if (top > window.innerHeight) {
+                    lives--;
+                    updateLives();
+                    zombie.remove();
+                    if (lives <= 0) {
+                        alert('游戏结束！\n最终得分: ' + score);
+                        resetGame();
+                    }
+                } else {
+                    zombie.style.top = (top + 2) + 'px';
+                }
+            });
+        }
+
+        function generateWrongZombie() {
+            let wrongWord;
+            do {
+                const randomPair = wordPairs[Math.floor(Math.random() * wordPairs.length)];
+                wrongWord = randomPair[0];
+            } while (wrongWord === currentQuestion[0]);
+            
+            createZombie(wrongWord, false);
+        }
+
+        function resetGame() {
+            score = 0;
+            lives = 3;
+            updateScore();
+            updateLives();
+            document.querySelectorAll('.zombie').forEach(z => z.remove());
+            generateQuestion();
+        }
+
+        // 游戏初始化
+        window.onload = () => {
+            updateScore();
+            updateLives();
+            generateQuestion();
+            
+            // 定期生成错误选项
+            setInterval(generateWrongZombie, 3000);
+            
+            // 移动僵尸
+            setInterval(moveZombies, 50);
+        };
+    </script>
 </head>
 <body>
     <div class="game-container">
         <div class="status-bar">
-            <div>生命值: ❤️❤️❤️</div>
-            <div>分数: 0</div>
+            <div id="lives">生命值: ❤️❤️❤️</div>
+            <div id="score">分数: 0</div>
         </div>
         
         <div class="question">
             请选择"需要"的马来文
-        </div>
-
-        <!-- 示例僵尸 -->
-        <div class="zombie" style="left: 20%; top: 30%">
-            <div class="zombie-word">memerlukan</div>
-            <div class="zombie-emoji">🧟</div>
-        </div>
-        
-        <div class="zombie" style="left: 60%; top: 40%">
-            <div class="zombie-word">lauk-pauk</div>
-            <div class="zombie-emoji">🧟</div>
         </div>
 
         <a href="../" class="back-button">返回主页</a>
