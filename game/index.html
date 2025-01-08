@@ -2,47 +2,24 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>游戏测试</title>
+    <title>马来语学习游戏</title>
     <script src="https://unpkg.com/react@17/umd/react.production.min.js"></script>
     <script src="https://unpkg.com/react-dom@17/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
     <style>
         body {
             margin: 0;
-            padding: 20px;
+            padding: 0;
             background-color: #1a1a1a;
             color: white;
             font-family: Arial, sans-serif;
         }
-        .test-container {
-            text-align: center;
-            margin-top: 100px;
+        .game-container {
+            width: 100%;
+            height: 100vh;
+            position: relative;
+            overflow: hidden;
         }
-        button {
-            padding: 10px 20px;
-            font-size: 16px;
-            background-color: #4285f4;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-    </style>
-</head>
-<body>
-    <div id="root"></div>
-    <script type="text/babel">
-        function Game() {
-            return (
-                <div className="test-container">
-                    <h1>游戏测试页面</h1>
-                    <button onClick={() => alert('按钮可以点击！')}>
-                        测试按钮
-                    </button>
-                </div>
-            );
-        }
-        ReactDOM.render(<Game />, document.getElementById('root'));
-    </script>
-</body>
-</html>
+        .status-bar {
+            position: absolute;
+            top:
