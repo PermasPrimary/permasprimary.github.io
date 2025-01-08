@@ -71,11 +71,23 @@
     <script>
         let score = 0;
         let lives = 3;
+        let lastQuestion = null;
         const wordPairs = [
             ['memerlukan', '需要'],
             ['lauk-pauk', '菜肴'],
             ['kegemaran', '喜欢的'],
-            ['bergerak', '移动']
+            ['bergerak', '移动'],
+            ['pengetahuan', '知识'],
+            ['penyabar', '有耐心的'],
+            ['merawat', '治疗'],
+            ['panggil', '叫'],
+            ['lemau', '皮了'],
+            ['gopoh', '匆忙'],
+            ['memainkan', '扮演'],
+            ['mencabut', '拔除'],
+            ['pengalaman', '经验'],
+            ['perpustakaan', '图书馆'],
+            ['mendaftarkan', '注册']
         ];
         let currentQuestion = null;
         let zombies = [];
@@ -109,16 +121,17 @@
                 if (isAnswer) {
                     score++;
                     updateScore();
-                    generateQuestion();
+                    zombie.remove();
+                    generateQuestion();  // 生成新题目
                 } else {
                     lives--;
                     updateLives();
+                    zombie.remove();
                     if (lives <= 0) {
                         alert('游戏结束！\n最终得分: ' + score);
                         resetGame();
                     }
                 }
-                zombie.remove();
             };
             
             document.querySelector('.game-container').appendChild(zombie);
@@ -126,7 +139,12 @@
         }
 
         function generateQuestion() {
-            const pair = wordPairs[Math.floor(Math.random() * wordPairs.length)];
+            let pair;
+            do {
+                pair = wordPairs[Math.floor(Math.random() * wordPairs.length)];
+            } while (lastQuestion && pair[1] === lastQuestion[1]);
+            
+            lastQuestion = pair;
             currentQuestion = pair;
             document.querySelector('.question').textContent = `请选择"${pair[1]}"的马来文`;
             createZombie(pair[0], true);
@@ -154,7 +172,7 @@
             do {
                 const randomPair = wordPairs[Math.floor(Math.random() * wordPairs.length)];
                 wrongWord = randomPair[0];
-            } while (wrongWord === currentQuestion[0]);
+            } while (currentQuestion && wrongWord === currentQuestion[0]);
             
             createZombie(wrongWord, false);
         }
@@ -162,22 +180,19 @@
         function resetGame() {
             score = 0;
             lives = 3;
+            lastQuestion = null;
             updateScore();
             updateLives();
             document.querySelectorAll('.zombie').forEach(z => z.remove());
             generateQuestion();
         }
 
-        // 游戏初始化
         window.onload = () => {
             updateScore();
             updateLives();
             generateQuestion();
             
-            // 定期生成错误选项
             setInterval(generateWrongZombie, 3000);
-            
-            // 移动僵尸
             setInterval(moveZombies, 50);
         };
     </script>
