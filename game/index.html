@@ -162,7 +162,7 @@
                         resetGame();
                     }
                 } else {
-                    zombie.style.top = (top + 2) + 'px';
+                    zombie.style.top = (top + 3) + 'px';
                 }
             });
         }
@@ -192,7 +192,7 @@
             updateLives();
             generateQuestion();
             
-            setInterval(generateWrongZombie, 3000);
+            setInterval(generateWrongZombie, 2000);
             setInterval(moveZombies, 50);
         };
     </script>
